@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\Agung_Suhendar_LPS_TestApp.props" />
+</Project>
