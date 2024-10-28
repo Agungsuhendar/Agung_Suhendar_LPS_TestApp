@@ -13,7 +13,7 @@ namespace Agung_Suhendar_LPS_TestApp.Controllers
         private readonly string _storagePath = Path.Combine(Directory.GetCurrentDirectory(), "UploadedDocuments");
 
         [HttpPost("upload")]
-        public async Task<IActionResult> Upload(IFormFile file, int chunkIndex, int totalChunks, string fileName)
+        public async Task<IActionResult> Upload([FromForm] IFormFile file, [FromForm] int chunkIndex, [FromForm] int totalChunks, [FromForm] string fileName)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("No file uploaded.");
