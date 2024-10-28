@@ -1,0 +1,75 @@
+﻿@{
+    ViewData["Title"] = "File Upload";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form id="uploadForm" enctype="multipart/form-data">
+    <div>
+        <label for="fileInput">Select a file to upload:</label>
+        <input type="file" id="fileInput" name="file" />
+    </div>
+    <button type="button" id="uploadButton">Upload</button>
+</form>
+
+<div id="progress"></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#uploadButton').click(function () {
+            var fileInput = $('#fileInput')[0];
+            var file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please select a file to upload.");
+                return;
+            }
+
+            console.log(file.size)
+            const chunkSize = 1024 * 1024; // 1 MB
+            const totalChunks = Math.ceil(file.size / chunkSize);
+            let currentChunkIndex = 0;
+
+            function uploadChunk(chunkIndex) {
+                const start = chunkIndex * chunkSize;
+                const end = Math.min(start + chunkSize, file.size);
+                const chunk = file.slice(start, end);
+
+                const formData = new FormData();
+                formData.append('file', chunk, file.name);
+                formData.append('chunkIndex', chunkIndex);
+                formData.append('totalChunks', totalChunks);
+                formData.append('fileName', file.name);
+                console.log(formData);
+
+                $.ajax({
+                    url: '/api/FileUpload/upload', // Adjust the URL to your controller
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        $('#progress').append(`<div>Uploaded chunk ${response.chunkIndex + 1} of ${response.totalChunks}</div>`);
+                        if (chunkIndex + 1 < totalChunks) {
+                            uploadChunk(chunkIndex + 1);
+                        } else {
+                            $('#progress').append('<div>Upload complete!</div>');
+                        }
+                    },
+                    error: function () {
+                        alert('An error occurred while uploading the file.');
+                    }
+                });
+            }
+
+            uploadChunk(currentChunkIndex);
+        });
+    });
+</script>
+
+<style>
+    #progress {
+        margin-top: 20px;
+    }
+</style>
